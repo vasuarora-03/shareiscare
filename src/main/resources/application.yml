@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: shareiscare
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cabpool
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+jwt:
+  secret: ${JWT_SECRET:change-this-to-a-long-random-secret-in-env-vars}
+  expiration-ms: 86400000 # 24 hours
+
+otp:
+  expiry-minutes: 5
