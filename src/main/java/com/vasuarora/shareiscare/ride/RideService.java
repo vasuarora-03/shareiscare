@@ -1,7 +1,7 @@
 package com.vasuarora.shareiscare.ride;
 
-import com.vasuarora.shareiscare.common.enums.CancellationType;
 import com.vasuarora.shareiscare.common.exception.ApiException;
+import com.vasuarora.shareiscare.common.util.CancellationClassifier;
 import com.vasuarora.shareiscare.ride.dto.RideRequest;
 import com.vasuarora.shareiscare.ride.dto.RideResponse;
 import com.vasuarora.shareiscare.user.User;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +20,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RideService {
-
-    private static final long LATE_CANCELLATION_THRESHOLD_MINUTES = 30;
 
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
@@ -104,10 +101,7 @@ public class RideService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "This ride cannot be cancelled.");
         }
 
-        long minutesUntilDeparture = Duration.between(LocalDateTime.now(), ride.getDepartureTime()).toMinutes();
-        ride.setCancellationType(minutesUntilDeparture < LATE_CANCELLATION_THRESHOLD_MINUTES
-                ? CancellationType.LATE
-                : CancellationType.NORMAL);
+        ride.setCancellationType(CancellationClassifier.classify(ride.getDepartureTime()));
         ride.setStatus(RideStatus.CANCELLED);
 
         return RideResponse.from(ride);
