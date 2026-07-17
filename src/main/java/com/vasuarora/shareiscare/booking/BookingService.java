@@ -62,12 +62,8 @@ public class BookingService {
 
     @Transactional
     public BookingResponse cancelBooking(Long passengerId, Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Booking not found."));
-
-        if (!booking.getPassenger().getId().equals(passengerId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "You are not authorized to cancel this booking.");
-        }
+        Booking booking = findBookingOrThrow(bookingId);
+        assertPassenger(booking, passengerId);
 
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "This booking cannot be cancelled.");
@@ -79,5 +75,35 @@ public class BookingService {
         ride.setAvailableSeats(ride.getAvailableSeats() + 1);
 
         return BookingResponse.from(booking);
+    }
+
+    @Transactional
+    public BookingResponse confirmCompletion(Long passengerId, Long bookingId) {
+        Booking booking = findBookingOrThrow(bookingId);
+        assertPassenger(booking, passengerId);
+
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "This booking cannot be confirmed as completed.");
+        }
+
+        if (booking.getRide().getStatus() != RideStatus.COMPLETED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "The driver must mark the ride as completed before you can confirm.");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        return BookingResponse.from(booking);
+    }
+
+    private Booking findBookingOrThrow(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Booking not found."));
+    }
+
+    private void assertPassenger(Booking booking, Long passengerId) {
+        if (!booking.getPassenger().getId().equals(passengerId)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "You are not authorized to perform this action on this booking.");
+        }
     }
 }

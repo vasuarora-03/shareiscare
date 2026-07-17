@@ -32,4 +32,10 @@ public class BookingController {
         BookingResponse response = bookingService.cancelBooking(CurrentUser.id(), bookingId);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully.", response));
     }
+
+    @PatchMapping("/bookings/{bookingId}/confirm-completion")
+    public ResponseEntity<ApiResponse<BookingResponse>> confirmCompletion(@PathVariable Long bookingId) {
+        BookingResponse response = bookingService.confirmCompletion(CurrentUser.id(), bookingId);
+        return ResponseEntity.ok(ApiResponse.success("Booking marked as completed.", response));
+    }
 }

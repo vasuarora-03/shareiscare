@@ -107,6 +107,24 @@ public class RideService {
         return RideResponse.from(ride);
     }
 
+    @Transactional
+    public RideResponse completeRide(Long driverId, Long rideId) {
+        Ride ride = findRideOrThrow(rideId);
+        assertDriver(ride, driverId);
+
+        if (ride.getStatus() != RideStatus.SCHEDULED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "This ride cannot be marked as completed.");
+        }
+
+        if (LocalDateTime.now().isBefore(ride.getDepartureTime())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Ride cannot be marked as completed before its departure time.");
+        }
+
+        ride.setStatus(RideStatus.COMPLETED);
+
+        return RideResponse.from(ride);
+    }
+
     private Ride findRideOrThrow(Long rideId) {
         return rideRepository.findById(rideId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Ride not found."));

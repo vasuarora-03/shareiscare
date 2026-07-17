@@ -61,4 +61,10 @@ public class RideController {
         RideResponse response = rideService.cancelRide(CurrentUser.id(), rideId);
         return ResponseEntity.ok(ApiResponse.success("Ride cancelled successfully.", response));
     }
+
+    @PatchMapping("/{rideId}/complete")
+    public ResponseEntity<ApiResponse<RideResponse>> completeRide(@PathVariable Long rideId) {
+        RideResponse response = rideService.completeRide(CurrentUser.id(), rideId);
+        return ResponseEntity.ok(ApiResponse.success("Ride marked as completed.", response));
+    }
 }
