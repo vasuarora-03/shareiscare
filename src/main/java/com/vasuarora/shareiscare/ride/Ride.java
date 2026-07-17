@@ -55,6 +55,10 @@ public class Ride {
     @Enumerated(EnumType.STRING)
     private CancellationType cancellationType;
 
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint not null default 0")
+    private Long version;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
