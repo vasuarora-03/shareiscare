@@ -31,6 +31,13 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    private String profilePictureUrl;
+
+    private String licenseDocumentUrl;
+
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private boolean licenseUploaded;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

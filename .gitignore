@@ -37,3 +37,9 @@ build/
 *.env
 application-local.yml
 application-secrets.yml
+
+### Personal study notes (local only, never pushed) ###
+docs/BUILD_LOG.md
+
+### Uploaded user files (profile pictures, licenses) - local only ###
+/uploads/

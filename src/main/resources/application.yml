@@ -26,3 +26,6 @@ jwt:
 
 otp:
   expiry-minutes: 5
+
+app:
+  upload-dir: ./uploads
