@@ -38,8 +38,10 @@ build/
 application-local.yml
 application-secrets.yml
 
-### Personal study notes (local only, never pushed) ###
-docs/BUILD_LOG.md
+### Personal study notes (local only, never pushed) - any format (.md, .pdf, etc.) ###
+docs/BUILD_LOG.*
+docs/CODE_MAP.*
+docs/INTERVIEW_PREP.*
 
 ### Uploaded user files (profile pictures, licenses) - local only ###
 /uploads/
