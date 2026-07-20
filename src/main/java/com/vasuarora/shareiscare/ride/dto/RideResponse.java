@@ -6,6 +6,7 @@ import com.vasuarora.shareiscare.ride.RideStatus;
 import com.vasuarora.shareiscare.user.User;
 import com.vasuarora.shareiscare.vehicle.Vehicle;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record RideResponse(
@@ -15,6 +16,7 @@ public record RideResponse(
         LocalDateTime departureTime,
         LocalDateTime estimatedArrival,
         Integer availableSeats,
+        BigDecimal pricePerSeat,
         RideStatus status,
         CancellationType cancellationType,
         DriverInfo driver,
@@ -39,6 +41,7 @@ public record RideResponse(
                 ride.getDepartureTime(),
                 ride.getEstimatedArrival(),
                 ride.getAvailableSeats(),
+                ride.getPricePerSeat(),
                 ride.getStatus(),
                 ride.getCancellationType(),
                 new DriverInfo(driver.getId(), driver.getName(), driver.getPhone()),

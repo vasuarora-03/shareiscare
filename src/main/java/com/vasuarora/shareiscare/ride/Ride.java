@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -47,6 +48,9 @@ public class Ride {
 
     @Column(nullable = false)
     private Integer availableSeats;
+
+    @Column(nullable = false, precision = 10, scale = 2, columnDefinition = "numeric(10,2) not null default 0")
+    private BigDecimal pricePerSeat;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -47,6 +47,7 @@ public class BookingService {
                 .passenger(userRepository.getReferenceById(passengerId))
                 .ride(ride)
                 .status(BookingStatus.CONFIRMED)
+                .pricePaid(ride.getPricePerSeat())
                 .build();
 
         ride.setAvailableSeats(ride.getAvailableSeats() - 1);

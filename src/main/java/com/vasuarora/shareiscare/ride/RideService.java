@@ -46,6 +46,7 @@ public class RideService {
                 .departureTime(request.departureTime())
                 .estimatedArrival(request.estimatedArrival())
                 .availableSeats(vehicle.getSeatCapacity())
+                .pricePerSeat(request.pricePerSeat())
                 .status(RideStatus.SCHEDULED)
                 .build();
 
@@ -88,6 +89,7 @@ public class RideService {
         ride.setEstimatedArrival(request.estimatedArrival());
         ride.setVehicle(vehicle);
         ride.setAvailableSeats(vehicle.getSeatCapacity());
+        ride.setPricePerSeat(request.pricePerSeat());
 
         return RideResponse.from(ride);
     }

@@ -42,6 +42,7 @@ application-secrets.yml
 docs/BUILD_LOG.*
 docs/CODE_MAP.*
 docs/INTERVIEW_PREP.*
+docs/DB_GUIDE.*
 
 ### Uploaded user files (profile pictures, licenses) - local only ###
 /uploads/

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,6 +40,9 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private CancellationType cancellationType;
+
+    @Column(nullable = false, precision = 10, scale = 2, columnDefinition = "numeric(10,2) not null default 0")
+    private BigDecimal pricePaid;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
