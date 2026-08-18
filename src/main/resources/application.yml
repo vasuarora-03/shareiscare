@@ -3,7 +3,7 @@ spring:
     name: shareiscare
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/cabpool
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cabpool}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
 
@@ -16,7 +16,7 @@ spring:
         format_sql: true
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api/v1
 
