@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -54,6 +55,7 @@ class BookingServiceTest {
                 .destination("Noida")
                 .status(RideStatus.SCHEDULED)
                 .availableSeats(2)
+                .pricePerSeat(new BigDecimal("500.00"))
                 .departureTime(LocalDateTime.now().plusHours(2))
                 .estimatedArrival(LocalDateTime.now().plusHours(3))
                 .build();
@@ -71,6 +73,18 @@ class BookingServiceTest {
         assertThat(response.status()).isEqualTo(BookingStatus.CONFIRMED);
         assertThat(ride.getAvailableSeats()).isEqualTo(1);
         verify(bookingRepository).save(any(Booking.class));
+    }
+
+    @Test
+    void bookRide_success_snapshotsCurrentPricePerSeatAsPricePaid() {
+        when(rideRepository.findById(10L)).thenReturn(Optional.of(ride));
+        when(bookingRepository.existsByRideIdAndPassengerIdAndStatus(10L, 2L, BookingStatus.CONFIRMED)).thenReturn(false);
+        when(userRepository.getReferenceById(2L)).thenReturn(passenger);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        BookingResponse response = bookingService.bookRide(2L, 10L);
+
+        assertThat(response.pricePaid()).isEqualByComparingTo("500.00");
     }
 
     @Test

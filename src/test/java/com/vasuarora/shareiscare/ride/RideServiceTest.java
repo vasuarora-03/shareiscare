@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -46,7 +47,8 @@ class RideServiceTest {
         request = new RideRequest("Delhi", "Noida",
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusHours(1),
-                5L);
+                5L,
+                new BigDecimal("500"));
     }
 
     private Ride existingRide() {
@@ -121,7 +123,8 @@ class RideServiceTest {
         RideRequest badRequest = new RideRequest("Delhi", "Noida",
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusHours(1),
-                5L);
+                5L,
+                new BigDecimal("500"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(driver));
         when(vehicleRepository.findById(5L)).thenReturn(Optional.of(vehicle));
 
