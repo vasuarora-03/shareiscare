@@ -11,8 +11,8 @@ post-ride ratings.
 - **Authentication** — Phone number + OTP based signup/login (no passwords), JWT-secured sessions
 - **User profiles** — Profile management, profile picture upload, driving license upload
 - **Vehicles** — Owners can register and manage multiple vehicles
-- **Rides** — Drivers create rides against a vehicle they own; riders search by source, destination, and date
-- **Bookings** — Seat reservation with live seat-count tracking, cancellation with NORMAL/LATE classification
+- **Rides** — Drivers create rides against a vehicle they own, with a per-seat price; riders search by source, destination, and date
+- **Bookings** — Seat reservation with live seat-count tracking, a price snapshot taken at booking time, and cancellation with NORMAL/LATE classification. Cancelling a ride automatically cancels its confirmed bookings.
 - **Ride completion** — Two-step confirmation (driver marks complete, passenger confirms) before a ride is considered done
 - **Chat** — REST-based messaging scoped to a confirmed booking's two participants
 - **Ratings** — Drivers and passengers rate each other after ride completion
@@ -115,9 +115,11 @@ defaults:
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/cabpool` | Full JDBC connection string |
 | `DB_USERNAME` | `postgres` | Postgres username |
 | `DB_PASSWORD` | `postgres` | Postgres password |
 | `JWT_SECRET` | placeholder | Signing key for JWTs — **must be overridden in any real deployment** |
+| `PORT` | `8080` | Port the server listens on |
 
 By default the app expects a database named `cabpool` at
 `jdbc:postgresql://localhost:5432/cabpool`.
@@ -139,12 +141,21 @@ flow:
 2. `POST /auth/verify-otp` with that OTP → returns a JWT
 3. Use the JWT as a Bearer token for all subsequent requests
 
+### Running the tests
+
+```bash
+./mvnw test
+```
+
+Unit tests cover every service's business rules and run against an in-memory
+H2 database, not the real Postgres instance — no setup needed beyond the JDK.
+
 ## Known Limitations (by design, for this version)
 
 - OTPs are held in memory and are lost on restart — no SMS gateway is wired up, OTPs are logged to the console instead
 - Chat is REST + client polling, not WebSockets
-- No automated test suite yet
 - Uploaded files are stored on local disk, not object storage
+- A driver can create overlapping rides against the same vehicle — no check that a vehicle isn't already committed to another scheduled ride at an overlapping time
 
 ## License
 

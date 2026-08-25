@@ -1,6 +1,8 @@
 package com.vasuarora.shareiscare.vehicle;
 
 import com.vasuarora.shareiscare.common.exception.ApiException;
+import com.vasuarora.shareiscare.ride.RideRepository;
+import com.vasuarora.shareiscare.ride.RideStatus;
 import com.vasuarora.shareiscare.user.User;
 import com.vasuarora.shareiscare.user.UserRepository;
 import com.vasuarora.shareiscare.vehicle.dto.VehicleRequest;
@@ -27,6 +29,8 @@ class VehicleServiceTest {
     private VehicleRepository vehicleRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RideRepository rideRepository;
 
     @InjectMocks
     private VehicleService vehicleService;
@@ -124,6 +128,19 @@ class VehicleServiceTest {
         vehicleService.deleteVehicle(1L, 5L);
 
         verify(vehicleRepository).delete(existing);
+    }
+
+    @Test
+    void deleteVehicle_blockedByActiveScheduledRide_throws409() {
+        Vehicle existing = Vehicle.builder().id(5L).owner(owner).build();
+        when(vehicleRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(rideRepository.existsByVehicleIdAndStatus(5L, RideStatus.SCHEDULED)).thenReturn(true);
+
+        assertThatThrownBy(() -> vehicleService.deleteVehicle(1L, 5L))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("active scheduled ride");
+
+        verify(vehicleRepository, org.mockito.Mockito.never()).delete(any());
     }
 
     @Test

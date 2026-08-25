@@ -26,7 +26,6 @@ public class RideController {
         return ResponseEntity.ok(ApiResponse.success("Ride created successfully.", response));
     }
 
-    // IMPORTANT: /me must stay declared before /{rideId} — see Decision #9 in PROJECT_BRAIN.md.
     // Spring MVC matches routes top-to-bottom; if {rideId} came first, "me" would be parsed as a rideId.
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<RideResponse>>> getMyRides() {

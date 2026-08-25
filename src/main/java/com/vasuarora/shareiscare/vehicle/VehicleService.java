@@ -1,6 +1,8 @@
 package com.vasuarora.shareiscare.vehicle;
 
 import com.vasuarora.shareiscare.common.exception.ApiException;
+import com.vasuarora.shareiscare.ride.RideRepository;
+import com.vasuarora.shareiscare.ride.RideStatus;
 import com.vasuarora.shareiscare.user.UserRepository;
 import com.vasuarora.shareiscare.vehicle.dto.VehicleRequest;
 import com.vasuarora.shareiscare.vehicle.dto.VehicleResponse;
@@ -17,6 +19,7 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
+    private final RideRepository rideRepository;
 
     @Transactional
     public VehicleResponse addVehicle(Long userId, VehicleRequest request) {
@@ -62,6 +65,11 @@ public class VehicleService {
     public void deleteVehicle(Long userId, Long vehicleId) {
         Vehicle vehicle = findVehicleOrThrow(vehicleId);
         assertOwner(vehicle, userId);
+
+        if (rideRepository.existsByVehicleIdAndStatus(vehicleId, RideStatus.SCHEDULED)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Cannot delete a vehicle that has an active scheduled ride.");
+        }
+
         vehicleRepository.delete(vehicle);
     }
 

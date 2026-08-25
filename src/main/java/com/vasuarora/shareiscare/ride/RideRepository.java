@@ -11,4 +11,6 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     List<Ride> findBySourceIgnoreCaseAndDestinationIgnoreCaseAndDepartureTimeBetweenAndStatus(
             String source, String destination, LocalDateTime start, LocalDateTime end, RideStatus status);
+
+    boolean existsByVehicleIdAndStatus(Long vehicleId, RideStatus status);
 }

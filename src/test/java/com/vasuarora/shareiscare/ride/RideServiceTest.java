@@ -1,5 +1,8 @@
 package com.vasuarora.shareiscare.ride;
 
+import com.vasuarora.shareiscare.booking.Booking;
+import com.vasuarora.shareiscare.booking.BookingRepository;
+import com.vasuarora.shareiscare.booking.BookingStatus;
 import com.vasuarora.shareiscare.common.exception.ApiException;
 import com.vasuarora.shareiscare.ride.dto.RideRequest;
 import com.vasuarora.shareiscare.ride.dto.RideResponse;
@@ -16,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +35,8 @@ class RideServiceTest {
     private UserRepository userRepository;
     @Mock
     private VehicleRepository vehicleRepository;
+    @Mock
+    private BookingRepository bookingRepository;
 
     @InjectMocks
     private RideService rideService;
@@ -165,6 +171,31 @@ class RideServiceTest {
     }
 
     @Test
+    void updateRide_success_accountsForExistingConfirmedBookings() {
+        Ride ride = existingRide();
+        when(rideRepository.findById(10L)).thenReturn(Optional.of(ride));
+        when(vehicleRepository.findById(5L)).thenReturn(Optional.of(vehicle));
+        when(bookingRepository.countByRideIdAndStatus(10L, BookingStatus.CONFIRMED)).thenReturn(1L);
+
+        RideResponse response = rideService.updateRide(1L, 10L, request);
+
+        assertThat(response.availableSeats()).isEqualTo(3);
+    }
+
+    @Test
+    void updateRide_vehicleTooSmallForExistingBookings_throws400() {
+        Ride ride = existingRide();
+        vehicle.setSeatCapacity(2);
+        when(rideRepository.findById(10L)).thenReturn(Optional.of(ride));
+        when(vehicleRepository.findById(5L)).thenReturn(Optional.of(vehicle));
+        when(bookingRepository.countByRideIdAndStatus(10L, BookingStatus.CONFIRMED)).thenReturn(3L);
+
+        assertThatThrownBy(() -> rideService.updateRide(1L, 10L, request))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("passenger(s) have already booked this ride");
+    }
+
+    @Test
     void cancelRide_success_marksCancelledWithClassification() {
         Ride ride = existingRide();
         ride.setDepartureTime(LocalDateTime.now().plusHours(2));
@@ -174,6 +205,24 @@ class RideServiceTest {
 
         assertThat(response.status()).isEqualTo(RideStatus.CANCELLED);
         assertThat(response.cancellationType()).isNotNull();
+    }
+
+    @Test
+    void cancelRide_cascadesCancellationToConfirmedBookings() {
+        Ride ride = existingRide();
+        ride.setDepartureTime(LocalDateTime.now().plusHours(2));
+        User passenger = User.builder().id(2L).name("Passenger").phone("9000000002").build();
+        Booking booking1 = Booking.builder().id(100L).passenger(passenger).ride(ride).status(BookingStatus.CONFIRMED).build();
+        Booking booking2 = Booking.builder().id(101L).passenger(passenger).ride(ride).status(BookingStatus.CONFIRMED).build();
+        when(rideRepository.findById(10L)).thenReturn(Optional.of(ride));
+        when(bookingRepository.findByRideIdAndStatus(10L, BookingStatus.CONFIRMED))
+                .thenReturn(List.of(booking1, booking2));
+
+        rideService.cancelRide(1L, 10L);
+
+        assertThat(booking1.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(booking1.getCancellationType()).isNotNull();
+        assertThat(booking2.getStatus()).isEqualTo(BookingStatus.CANCELLED);
     }
 
     @Test

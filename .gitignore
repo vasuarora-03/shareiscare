@@ -43,6 +43,8 @@ docs/BUILD_LOG.*
 docs/CODE_MAP.*
 docs/INTERVIEW_PREP.*
 docs/DB_GUIDE.*
+docs/ROADMAP.*
+docs/FILE_GUIDE.*
 
 ### Uploaded user files ###
 /uploads/

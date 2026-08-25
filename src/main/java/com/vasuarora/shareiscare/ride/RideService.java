@@ -1,5 +1,9 @@
 package com.vasuarora.shareiscare.ride;
 
+import com.vasuarora.shareiscare.booking.Booking;
+import com.vasuarora.shareiscare.booking.BookingRepository;
+import com.vasuarora.shareiscare.booking.BookingStatus;
+import com.vasuarora.shareiscare.common.enums.CancellationType;
 import com.vasuarora.shareiscare.common.exception.ApiException;
 import com.vasuarora.shareiscare.common.util.CancellationClassifier;
 import com.vasuarora.shareiscare.ride.dto.RideRequest;
@@ -24,6 +28,7 @@ public class RideService {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional
     public RideResponse createRide(Long driverId, RideRequest request) {
@@ -83,12 +88,19 @@ public class RideService {
         assertVehicleOwnership(vehicle, driverId);
         assertArrivalAfterDeparture(request.departureTime(), request.estimatedArrival());
 
+        long confirmedBookings = bookingRepository.countByRideIdAndStatus(rideId, BookingStatus.CONFIRMED);
+        if (vehicle.getSeatCapacity() < confirmedBookings) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "This vehicle only has " + vehicle.getSeatCapacity() + " seat(s), but "
+                            + confirmedBookings + " passenger(s) have already booked this ride.");
+        }
+
         ride.setSource(request.source());
         ride.setDestination(request.destination());
         ride.setDepartureTime(request.departureTime());
         ride.setEstimatedArrival(request.estimatedArrival());
         ride.setVehicle(vehicle);
-        ride.setAvailableSeats(vehicle.getSeatCapacity());
+        ride.setAvailableSeats((int) (vehicle.getSeatCapacity() - confirmedBookings));
         ride.setPricePerSeat(request.pricePerSeat());
 
         return RideResponse.from(ride);
@@ -103,8 +115,15 @@ public class RideService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "This ride cannot be cancelled.");
         }
 
-        ride.setCancellationType(CancellationClassifier.classify(ride.getDepartureTime()));
+        CancellationType cancellationType = CancellationClassifier.classify(ride.getDepartureTime());
+        ride.setCancellationType(cancellationType);
         ride.setStatus(RideStatus.CANCELLED);
+
+        List<Booking> confirmedBookings = bookingRepository.findByRideIdAndStatus(rideId, BookingStatus.CONFIRMED);
+        for (Booking booking : confirmedBookings) {
+            booking.setCancellationType(cancellationType);
+            booking.setStatus(BookingStatus.CANCELLED);
+        }
 
         return RideResponse.from(ride);
     }

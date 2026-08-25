@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ApiError> handleOptimisticLockingFailure(OptimisticLockingFailureException ex) {
-        String message = "This ride was just updated by someone else. Please try again.";
+        String message = "This ride was just updated by someone else. Please try again :)";
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiError.of(HttpStatus.CONFLICT.value(), message));
     }
